@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { envVars } from './envVars.config';
-import logger from './logger.config';
+import { logger } from './logger.config';
 const uri = envVars.DB_URI as string;
 
 const DbConnection = async (): Promise<void> => {

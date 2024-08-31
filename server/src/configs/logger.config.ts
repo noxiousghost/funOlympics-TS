@@ -1,4 +1,5 @@
 import { createLogger, format, transports } from 'winston';
+import morgan from 'morgan';
 import { envVars } from './envVars.config';
 
 const env = envVars.ENV;
@@ -38,4 +39,23 @@ By setting the log level to info,
 the logger will capture and log messages that are categorized as info, warn, and error, 
 but it will ignore messages that are less severe, such as debug, verbose, and silly.
 */
-export default logger;
+
+const morganMiddleware = () => {
+  const morganFormat = ':method :url :status :response-time ms';
+
+  return morgan(morganFormat, {
+    stream: {
+      write: (message: string) => {
+        const logObject = {
+          method: message.split(' ')[0],
+          url: message.split(' ')[1],
+          status: message.split(' ')[2],
+          responseTime: message.split(' ')[3],
+        };
+        logger.info(JSON.stringify(logObject));
+      },
+    },
+  });
+};
+
+export { logger, morganMiddleware };
