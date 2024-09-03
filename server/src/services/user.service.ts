@@ -3,13 +3,19 @@ import User from '../schemas/user.schema';
 import Bcrypt from 'bcrypt';
 import MailService from '../utils/mail.util';
 import MailSender from '../utils/mailSender.util';
+import jwt from 'jsonwebtoken';
+import { envVars } from '../configs/envVars.config';
+
+const SECRET = envVars.JWTSECRET as string;
 
 export const findAllUsers = async () => {
-  return await User.find({}).populate('favourites');
+  return await User.find({});
+  // return await User.find({}).populate('favourites');
 };
 
 export const findUserById = async (id: string) => {
-  return await User.findById(id).populate('favourites');
+  return await User.findById(id);
+  // return await User.findById(id).populate('favourites');
 };
 
 export const createUser = async (userData: any) => {
@@ -85,4 +91,28 @@ export const updateFavourites = async (
   }
   await user.save();
   return { success: true, data: result };
+};
+
+export const authenticateUser = async (email: string, password: string) => {
+  const user: any = await User.findOne({ email });
+  const passwordCorrect =
+    user === null ? false : await Bcrypt.compare(password, user.passwordHash);
+  if (user && passwordCorrect) {
+    const userForToken = {
+      username: user.username,
+      email: user.email,
+      country: user.country,
+      favoriteSport: user.favoriteSport,
+      isAdmin: user.isAdmin,
+      id: user._id.toString(),
+    };
+    const token = jwt.sign(userForToken, SECRET, { expiresIn: '365d' });
+
+    user.logged_in += 1;
+    await user.save();
+
+    return { token, userForToken };
+  } else {
+    throw new Error('Invalid email or password');
+  }
 };
