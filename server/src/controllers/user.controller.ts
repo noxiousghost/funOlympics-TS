@@ -55,3 +55,24 @@ export const updateFavourites = async (req: Request, res: Response) => {
     ? res.status(200).json(result.data)
     : res.status(401).json({ error: result.error });
 };
+
+export const loginUser = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    const { token, userForToken } = await UserService.authenticateUser(
+      email,
+      password,
+    );
+    res.status(200).json({
+      token,
+      username: userForToken.username,
+      country: userForToken.country,
+      favoriteSport: userForToken.favoriteSport,
+      email: userForToken.email,
+      isAdmin: userForToken.isAdmin,
+      id: userForToken.id,
+    });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
