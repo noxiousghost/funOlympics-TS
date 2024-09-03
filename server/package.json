@@ -7,7 +7,7 @@
     "build:compile": "npx babel src --extensions .ts --out-dir dist --source-maps",
     "build:types": "tsc",
     "start": "node ./dist/index.js",
-    "dev": "nodemon ./src/index.ts",
+    "dev": "ts-node --files ./src/index.ts",
     "build": "npm run build:compile && npm run build:types",
     "prepare": "cd .. && husky /server/.husky",
     "prettier": "prettier --write \"src/**/*.ts\"",
