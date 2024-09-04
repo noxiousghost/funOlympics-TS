@@ -7,8 +7,11 @@ import {
 } from './middlewares/authentication.middleware';
 import DbConnection from './configs/db.config';
 import userRouter from './routes/user.route';
+import helmet from 'helmet';
+
 const port = envVars.PORT;
 DbConnection();
+app.use(helmet());
 app.use(morganMiddleware());
 app.use(tokenExtractor);
 app.use(userExtractor);
