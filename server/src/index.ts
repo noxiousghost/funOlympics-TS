@@ -9,15 +9,23 @@ import DbConnection from './configs/db.config';
 import userRouter from './routes/user.route';
 import ForgetPasswordRouter from './routes/forgetPW.route';
 import helmet from 'helmet';
+import { unknownEndpoint } from 'middlewares/unknownEndpoint.middleware';
+import { errorHandler } from 'middlewares/errorHandlers.middleware';
 
 const port = envVars.PORT;
 DbConnection();
+
 app.use(helmet());
 app.use(morganMiddleware());
 app.use(tokenExtractor);
 app.use(userExtractor);
+
 app.use('/api/users', userRouter);
 app.use('/api/password', ForgetPasswordRouter);
+
+app.use(unknownEndpoint);
+app.use(errorHandler);
+
 app.listen(port, () => {
   logger.info(`App listening on port ${port}`);
 });
