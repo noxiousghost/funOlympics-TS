@@ -20,11 +20,11 @@ export const findUserById = async (id: string) => {
 
 export const createUser = async (userData: any) => {
   const { username, email, password, country, favoriteSport, phone } = userData;
-  if (username.length < 3 || password.length < 3) {
-    throw new Error(
-      'Username and password must be at least 3 characters long!',
-    );
-  }
+  // if (username.length < 3 || password.length < 3) {
+  //   throw new Error(
+  //     'Username and password must be at least 3 characters long!',
+  //   );
+  // }
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     throw new Error('Email already registered');
