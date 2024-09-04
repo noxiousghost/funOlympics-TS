@@ -17,3 +17,10 @@ export const loginSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
+
+export const forgetPWSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string()
+    .pattern(new RegExp('(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}'))
+    .required(),
+});
