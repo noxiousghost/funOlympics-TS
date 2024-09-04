@@ -7,6 +7,7 @@ import {
 } from './middlewares/authentication.middleware';
 import DbConnection from './configs/db.config';
 import userRouter from './routes/user.route';
+import ForgetPasswordRouter from './routes/forgetPW.route';
 import helmet from 'helmet';
 
 const port = envVars.PORT;
@@ -16,6 +17,7 @@ app.use(morganMiddleware());
 app.use(tokenExtractor);
 app.use(userExtractor);
 app.use('/api/users', userRouter);
+app.use('/api/password', ForgetPasswordRouter);
 app.listen(port, () => {
   logger.info(`App listening on port ${port}`);
 });
