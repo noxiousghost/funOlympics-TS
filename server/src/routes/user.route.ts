@@ -4,6 +4,8 @@ import { validateRequest } from '../middlewares/validation.middleware';
 import { rateLimiter } from '../middlewares/rateLimit.middleware';
 import { registerSchema, loginSchema } from '../constants/user.validation';
 import * as UserController from '../controllers/user.controller';
+import * as PasswordController from '../controllers/forgetPW.controller';
+import { forgetPWSchema } from '../constants/user.validation';
 
 const userRouter = Router();
 
@@ -23,6 +25,14 @@ userRouter.post(
   rateLimiter,
   validateRequest(loginSchema),
   UserController.loginUser,
+);
+userRouter.post('/forgetPW/send_mail', PasswordController.sendResetEmail);
+userRouter.post('/forgetPW/verify_otp', PasswordController.verifyOtpCode);
+userRouter.post(
+  '/forgetPW/new_password',
+  rateLimiter,
+  validateRequest(forgetPWSchema),
+  PasswordController.changePassword,
 );
 
 export default userRouter;
