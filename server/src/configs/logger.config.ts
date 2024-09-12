@@ -7,7 +7,10 @@ const env = envVars.ENV;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formatParams = (info: any): string => {
   const { timestamp, level, message, ...args } = info;
-  const ts = timestamp.slice(0, 19).replace('T', ' ');
+  const date = new Date(timestamp);
+  const ts = date
+    .toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' })
+    .slice(0, 19);
 
   return `${ts} ${level}:${message} ${Object.keys(args).length ? JSON.stringify(args) : ''}`;
 };
