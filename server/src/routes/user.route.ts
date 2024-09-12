@@ -9,25 +9,43 @@ import { forgetPWSchema } from '../constants/user.validation';
 
 const userRouter = Router();
 
+// get all users after admin login
 userRouter.get('/', checkAdmin, UserController.getAllUsers);
+
+// get user by id after user login
 userRouter.get('/:id', UserController.getUserById);
+
+// signup user
 userRouter.post(
   '/',
   rateLimiter,
   validateRequest(registerSchema),
   UserController.createUser,
 );
+// verify otp code after signup
 userRouter.post('/verify', UserController.verifyUser);
+
+// update user after user login
 userRouter.patch('/:id', UserController.updateUser);
+
+// update favourites after user login
 userRouter.patch('/fav/:id', UserController.updateFavourites);
+
+// login user
 userRouter.post(
   '/login',
   rateLimiter,
   validateRequest(loginSchema),
   UserController.loginUser,
 );
+
+// send reset email for forget password
 userRouter.post('/forgetPW/send_mail', PasswordController.sendResetEmail);
+
+// verify otp code for forget password
 userRouter.post('/forgetPW/verify_otp', PasswordController.verifyOtpCode);
+
+// change password after forget password
 userRouter.post(
   '/forgetPW/new_password',
   rateLimiter,
