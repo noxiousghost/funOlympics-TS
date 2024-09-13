@@ -6,6 +6,7 @@ import { registerSchema, loginSchema } from '../constants/user.validation';
 import * as UserController from '../controllers/user.controller';
 import * as PasswordController from '../controllers/forgetPW.controller';
 import { forgetPWSchema } from '../constants/user.validation';
+import { userExists } from '../middlewares/exists.middleware';
 
 const userRouter = Router();
 
@@ -19,6 +20,7 @@ userRouter.get('/:id', UserController.getUserById);
 userRouter.post(
   '/',
   rateLimiter,
+  userExists,
   validateRequest(registerSchema),
   UserController.createUser,
 );
@@ -26,7 +28,12 @@ userRouter.post(
 userRouter.post('/verify', UserController.verifyUser);
 
 // update user after user login
-userRouter.patch('/:id', UserController.updateUser);
+userRouter.patch(
+  '/:id',
+  userExists,
+  validateRequest(registerSchema),
+  UserController.updateUser,
+);
 
 // update favourites after user login
 userRouter.patch('/fav/:id', UserController.updateFavourites);
