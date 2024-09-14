@@ -2,7 +2,11 @@ import { Router } from 'express';
 import { checkAdmin } from '../middlewares/authentication.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 import { rateLimiter } from '../middlewares/rateLimit.middleware';
-import { registerSchema, loginSchema } from '../constants/user.validation';
+import {
+  registerSchema,
+  loginSchema,
+  updateSchema,
+} from '../constants/user.validation';
 import * as UserController from '../controllers/user.controller';
 import * as PasswordController from '../controllers/forgetPW.controller';
 import { forgetPWSchema } from '../constants/user.validation';
@@ -31,7 +35,7 @@ userRouter.post('/verify', UserController.verifyUser);
 userRouter.patch(
   '/:id',
   userExists,
-  validateRequest(registerSchema),
+  validateRequest(updateSchema),
   UserController.updateUser,
 );
 
