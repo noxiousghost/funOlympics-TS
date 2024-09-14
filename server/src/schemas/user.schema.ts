@@ -4,8 +4,8 @@ import { IUser } from '../models/user.model';
 const userSchema = new Schema<IUser>(
   {
     username: { type: String, required: true },
-    phone: { type: String },
-    email: { type: String, required: true },
+    phone: { type: String, unique: true },
+    email: { type: String, required: true, unique: true },
     country: { type: String },
     favoriteSport: { type: String },
     passwordHash: { type: String, required: true },
@@ -20,11 +20,17 @@ const userSchema = new Schema<IUser>(
   },
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function docTransform(doc: IUser, ret: any): any {
-  ret.id = ret._id.toString();
-  delete ret._id;
-  delete ret.passwordHash; // password hash is never exposed
+function docTransform(
+  doc: IUser,
+  ret: Record<string, unknown>,
+): Record<string, unknown> {
+  const transformedRet: Record<string, unknown> = {
+    ...ret,
+    id: (ret._id as mongoose.Types.ObjectId).toString(),
+  };
+  delete transformedRet._id;
+  delete transformedRet.passwordHash; // password hash is never exposed
+  return transformedRet;
 }
 
 const User = mongoose.model<IUser>('users', userSchema);
