@@ -1,5 +1,8 @@
 import { Router } from 'express';
-import { checkAdmin } from '../middlewares/authentication.middleware';
+import {
+  checkAdmin,
+  checkValidAuth,
+} from '../middlewares/authentication.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 import { rateLimiter } from '../middlewares/rateLimit.middleware';
 import {
@@ -10,7 +13,6 @@ import {
 import * as UserController from '../controllers/user.controller';
 import * as PasswordController from '../controllers/forgetPW.controller';
 import { forgetPWSchema } from '../constants/user.validation';
-import { userExists } from '../middlewares/exists.middleware';
 
 const userRouter = Router();
 
@@ -18,13 +20,12 @@ const userRouter = Router();
 userRouter.get('/', checkAdmin, UserController.getAllUsers);
 
 // get user by id after user login
-userRouter.get('/:id', UserController.getUserById);
+userRouter.get('/:id', checkValidAuth, UserController.getUserById);
 
 // signup user
 userRouter.post(
   '/',
   rateLimiter,
-  userExists,
   validateRequest(registerSchema),
   UserController.createUser,
 );
@@ -34,13 +35,13 @@ userRouter.post('/verify', UserController.verifyUser);
 // update user after user login
 userRouter.patch(
   '/:id',
-  userExists,
+  checkValidAuth,
   validateRequest(updateSchema),
   UserController.updateUser,
 );
 
 // update favourites after user login
-userRouter.patch('/fav/:id', UserController.updateFavourites);
+userRouter.patch('/fav/:id', checkValidAuth, UserController.updateFavourites);
 
 // login user
 userRouter.post(
