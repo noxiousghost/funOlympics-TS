@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../schemas/user.schema';
 import { envVars } from '../configs/envVars.config';
-
+import { AppError } from '../middlewares/errorHandlers.middleware';
 const SECRET = envVars.JWTSECRET as string;
 
 // Middleware to extract token from the Authorization header
@@ -33,6 +34,25 @@ export const userExtractor = async (
     } catch (error) {
       next(error);
     }
+  }
+  next();
+};
+export const checkValidAuth = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.user;
+    const id = req.params.id;
+    if (user.id !== id && !user.isAdmin) {
+      throw new AppError(
+        'You do not have permission to perform this action',
+        403,
+      );
+    }
+  } catch (error) {
+    next(error);
   }
   next();
 };
