@@ -1,33 +1,47 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import User from '../schemas/user.schema';
 import Bcrypt from 'bcrypt';
 import MailService from '../utils/mail.util';
 import MailSender from '../utils/mailSender.util';
 import jwt from 'jsonwebtoken';
 import { envVars } from '../configs/envVars.config';
+import { AppError } from '../middlewares/errorHandlers.middleware';
+import { logger } from '../configs/logger.config';
+import { IUser } from '../models/user.model';
+import mongoose from 'mongoose';
 
 const SECRET = envVars.JWTSECRET as string;
 
 export const findAllUsers = async () => {
-  return await User.find({});
+  const result = await User.find({});
+  if (!result) {
+    throw new AppError('Users not found', 404);
+  }
+  return result;
   // return await User.find({}).populate('favourites');
 };
 
-export const findUserById = async (id: string) => {
-  return await User.findById(id);
-  // return await User.findById(id).populate('favourites');
+export const findUserById = async (id: string, user: IUser) => {
+  const result = await User.findById(id);
+  if (!result) {
+    throw new AppError('User not found', 404);
+  }
+  return result;
 };
 
-export const createUser = async (userData: any) => {
+export const createUser = async (userData: {
+  username: string;
+  email: string;
+  password: string;
+  country: string;
+  favoriteSport: string;
+  phone: string;
+}) => {
   const { username, email, password, country, favoriteSport, phone } = userData;
-  // if (username.length < 3 || password.length < 3) {
-  //   throw new Error(
-  //     'Username and password must be at least 3 characters long!',
-  //   );
-  // }
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    throw new Error('Email already registered');
+  const userEmail = await User.findOne({ email });
+  const userPhone = await User.findOne({ phone });
+  if (userEmail || userPhone) {
+    throw new AppError('User with that email or phone already exists', 400);
   }
   const passwordHash = await Bcrypt.hash(password, 10);
   const user = new User({
@@ -39,26 +53,60 @@ export const createUser = async (userData: any) => {
     favoriteSport,
   });
   const savedUser = await user.save();
-  await MailSender.sendEmail(email); // Assuming sendEmail now handles exceptions internally
-  return savedUser;
+  logger.info(`New ${savedUser.username} user created`);
+  await MailSender.sendEmail(email);
 };
 
 export const verifyUser = async (email: string, code: number) => {
-  const mail = await MailService.find(email);
-  if (mail && mail.code === code) {
-    const user: any = await User.findOne({ email });
-    user.verified = true;
-    await user.save();
-    return user;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError('User not registered', 404);
   }
-  return null;
+
+  const mail = await MailService.find(email);
+  if (!mail) {
+    throw new AppError('Verification code not found', 400);
+  }
+
+  if (mail.code !== code) {
+    throw new AppError('Invalid OTP', 400);
+  }
+
+  user.verified = true;
+  await user.save();
+  return user;
 };
 
-export const updateUser = async (id: string, userData: any, user: any) => {
-  if (user.id !== id && !user.isAdmin) {
-    return { error: 'Unauthorized update!' };
-  }
+export const updateUser = async (
+  id: string,
+  userData: {
+    username: string;
+    email: string;
+    password: string;
+    country: string;
+    favoriteSport: string;
+    phone: string;
+  },
+) => {
   const { username, email, password, country, favoriteSport, phone } = userData;
+  const currentUser = await User.findById(id);
+  if (!currentUser) {
+    throw new AppError('User not found', 404);
+  }
+  // Check only if the email is different from the current one
+  if (email && email !== currentUser.email) {
+    const userEmail = await User.findOne({ email });
+    if (userEmail) {
+      throw new AppError('User with that email already exists', 400);
+    }
+  }
+  // Check only if the phone is different from the current one
+  if (phone && phone !== currentUser.phone) {
+    const userPhone = await User.findOne({ phone });
+    if (userPhone) {
+      throw new AppError('User with that phone number already exists', 400);
+    }
+  }
   const passwordHash = password ? await Bcrypt.hash(password, 10) : null;
   const newData = {
     username,
@@ -68,51 +116,63 @@ export const updateUser = async (id: string, userData: any, user: any) => {
     favoriteSport,
     phone,
   };
-  await User.findByIdAndUpdate(id, newData, { runValidators: true });
+  await User.findByIdAndUpdate(id, newData);
   return await User.findById(id);
 };
 
 export const updateFavourites = async (
   id: string,
   videoId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user: any,
 ) => {
   if (user.id !== id && !user.isAdmin) {
-    return { success: false, error: 'Unauthorized!' };
+    throw new AppError('Unauthorized!', 401);
   }
-  const exists = user.favourites.some((fav: string) => fav === videoId);
-  let result;
-  if (exists) {
-    user.favourites = user.favourites.filter((fav: string) => fav !== videoId);
-    result = { message: 'Removed from favourites', data: user.favourites };
-  } else {
-    user.favourites.push(videoId);
-    result = { message: 'Added to favourites', data: user.favourites };
+  try {
+    const exists = user.favourites.some((fav: string) => fav === videoId);
+    let result;
+    if (exists) {
+      user.favourites = user.favourites.filter(
+        (fav: string) => fav !== videoId,
+      );
+      result = { message: 'Removed from favourites', data: user.favourites };
+    } else {
+      user.favourites.push(videoId);
+      result = { message: 'Added to favourites', data: user.favourites };
+    }
+    await user.save();
+    return { success: true, data: result };
+  } catch (error) {
+    throw new AppError(error as string, 500);
   }
-  await user.save();
-  return { success: true, data: result };
 };
 
 export const authenticateUser = async (email: string, password: string) => {
-  const user: any = await User.findOne({ email });
-  const passwordCorrect =
-    user === null ? false : await Bcrypt.compare(password, user.passwordHash);
-  if (user && passwordCorrect) {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError('Invalid email or password', 400);
+  }
+  const passwordCorrect = await Bcrypt.compare(password, user.passwordHash);
+  if (!passwordCorrect) {
+    throw new AppError('Invalid email or password', 400);
+  }
+  try {
     const userForToken = {
       username: user.username,
       email: user.email,
       country: user.country,
       favoriteSport: user.favoriteSport,
       isAdmin: user.isAdmin,
-      id: user._id.toString(),
+      id: user._id?.toString() || '',
     };
-    const token = jwt.sign(userForToken, SECRET, { expiresIn: '365d' });
+    const token = jwt.sign(userForToken, SECRET, { expiresIn: '1d' });
 
-    user.logged_in += 1;
+    user.logged_in = (user.logged_in || 0) + 1;
     await user.save();
 
-    return { token, userForToken };
-  } else {
-    throw new Error('Invalid email or password');
+    return { token };
+  } catch (error) {
+    throw new AppError(error as string, 500);
   }
 };
