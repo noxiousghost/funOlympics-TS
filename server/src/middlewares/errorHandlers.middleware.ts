@@ -4,21 +4,17 @@ import { MongoServerError } from 'mongodb';
 import { envVars } from '../configs/envVars.config';
 import { logger } from '../configs/logger.config';
 
-// Custom Error Class
 export class AppError extends Error {
   statusCode: number;
   isOperational: boolean;
-
   constructor(message: string, statusCode: number) {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = true;
-
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
-// Error Handler Middleware
+// middleware to handle errors
 export const errorHandler = (
   err: Error,
   req: Request,
@@ -28,8 +24,7 @@ export const errorHandler = (
   let statusCode = 500;
   let message = 'Something went wrong';
 
-  // Log error for debugging
-  logger.error(`!!!${err.stack}`);
+  logger.error(`${err.stack}`);
 
   // Handle known operational errors (custom AppError)
   if (err instanceof AppError) {
@@ -37,7 +32,7 @@ export const errorHandler = (
     message = err.message;
   }
 
-  // Handle specific Mongoose-related errors
+  // Handle specific errors
   switch (err.name) {
     case 'CastError':
       statusCode = 400;

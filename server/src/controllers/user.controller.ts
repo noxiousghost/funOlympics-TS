@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express';
 import * as UserService from '../services/user.service';
-import { catchAsync, AppError } from '../middlewares/errorHandlers.middleware';
+import { catchAsync } from '../middlewares/errorHandlers.middleware';
 
 // Get all users
 export const getAllUsers = catchAsync(

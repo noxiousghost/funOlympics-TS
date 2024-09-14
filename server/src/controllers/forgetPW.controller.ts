@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from 'express';
 import * as PasswordService from '../services/forgetPW.service';
 import { catchAsync } from '../middlewares/errorHandlers.middleware';
