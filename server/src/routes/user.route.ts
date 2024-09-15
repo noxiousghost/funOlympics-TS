@@ -9,10 +9,10 @@ import {
   registerSchema,
   loginSchema,
   updateSchema,
+  forgetPWSchema,
 } from '../constants/user.validation';
 import * as UserController from '../controllers/user.controller';
 import * as PasswordController from '../controllers/forgetPW.controller';
-import { forgetPWSchema } from '../constants/user.validation';
 
 const userRouter = Router();
 

@@ -37,6 +37,8 @@ export const userExtractor = async (
   }
   next();
 };
+
+// middleware to check if the route is accessed by the user of the resource or admin
 export const checkValidAuth = (
   req: Request,
   res: Response,
