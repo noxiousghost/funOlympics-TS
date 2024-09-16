@@ -45,7 +45,7 @@ const fileFilter = (
 const storage = multer.diskStorage({
   destination: function (req: FileRequest, file: Express.Multer.File, cb) {
     const fileType = req.fileType || 'misc';
-    const uploadPath = path.join(process.cwd(), 'public', 'uploads', fileType);
+    const uploadPath = path.join('public', 'uploads', fileType);
     fs.promises
       .mkdir(uploadPath, { recursive: true })
       .then(() => cb(null, uploadPath))
