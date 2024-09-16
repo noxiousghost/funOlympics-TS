@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../middlewares/errorHandlers.middleware';
 
 interface FileRequest extends Request {
   fileType?: string;
@@ -15,11 +16,15 @@ export const multerErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  if (err) {
-    res.status(413).json({ error: err.message });
-  } else {
-    next();
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return next(new AppError('File size limit exceeded', 413));
+    }
+    return next(new AppError(`Multer error: ${err.message}`, 400));
+  } else if (err) {
+    return next(new AppError(err.message, 500));
   }
+  next();
 };
 
 // File type validation
@@ -28,16 +33,28 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) => {
-  const allowedTypes = /jpeg|jpg|png|gif|mp4|mov|avi/;
-  const mimeType = allowedTypes.test(file.mimetype);
-  const extname = allowedTypes.test(
-    path.extname(file.originalname).toLowerCase(),
-  );
+  const allowedTypes: { [key: string]: string[] } = {
+    'image/jpeg': ['.jpg', '.jpeg'],
+    'image/png': ['.png'],
+    'image/gif': ['.gif'],
+    'video/mp4': ['.mp4'],
+    'video/quicktime': ['.mov'],
+    'video/x-msvideo': ['.avi'],
+  };
 
-  if (mimeType && extname) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (
+    allowedTypes[file.mimetype] &&
+    allowedTypes[file.mimetype].includes(ext)
+  ) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only images and videos are allowed.'));
+    cb(
+      new AppError(
+        'Invalid file type. Only specific image and video formats are allowed.',
+        415,
+      ),
+    );
   }
 };
 
