@@ -63,9 +63,7 @@ export const checkValidAuth = (
 export const checkAdmin = (req: Request, res: Response, next: NextFunction) => {
   const user = req.user;
   if (!user || !user.isAdmin) {
-    res
-      .status(403)
-      .json({ error: 'Access denied. Admin privileges required.' });
+    throw new AppError('Access denied. Admin privileges required.', 403);
   } else {
     next();
   }
