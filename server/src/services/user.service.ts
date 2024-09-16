@@ -38,9 +38,7 @@ export const createUser = async (userData: {
   phone: string;
 }) => {
   const { username, email, password, country, favoriteSport, phone } = userData;
-  const userEmail = await User.findOne({ email });
-  const userPhone = await User.findOne({ phone });
-  if (userEmail || userPhone) {
+  if ((await User.findOne({ email })) || (await User.findOne({ phone }))) {
     throw new AppError('User with that email or phone already exists', 400);
   }
   const passwordHash = await Bcrypt.hash(password, 10);
@@ -52,9 +50,16 @@ export const createUser = async (userData: {
     phone,
     favoriteSport,
   });
-  const savedUser = await user.save();
-  logger.info(`New ${savedUser.username} user created`);
-  await MailSender.sendEmail(email);
+  const result = await user.save();
+  if (!result) {
+    throw new AppError('User not created', 400);
+  }
+  logger.info(`New ${result.username} user created`);
+  const sendEmail = await MailSender.sendEmail(email);
+  if (!sendEmail) {
+    throw new AppError('Error while sending verification email', 400);
+  }
+  return result;
 };
 
 export const verifyUser = async (email: string, code: number) => {
@@ -62,18 +67,19 @@ export const verifyUser = async (email: string, code: number) => {
   if (!user) {
     throw new AppError('User not registered', 404);
   }
-
   const mail = await MailService.find(email);
   if (!mail) {
     throw new AppError('Verification code not found', 400);
   }
-
   if (mail.code !== code) {
     throw new AppError('Invalid OTP', 400);
   }
-
   user.verified = true;
-  await user.save();
+  const result = await user.save();
+  if (!result) {
+    throw new AppError('User not verified', 400);
+  }
+  logger.info(`${result.username} user verified`);
   return user;
 };
 
@@ -116,37 +122,41 @@ export const updateUser = async (
     favoriteSport,
     phone,
   };
-  await User.findByIdAndUpdate(id, newData);
+  const result = await User.findByIdAndUpdate(id, newData);
+  if (!result) {
+    throw new AppError('User not updated', 400);
+  }
+  logger.info(`${result.username} user updated`);
   return await User.findById(id);
 };
 
-export const updateFavourites = async (
-  id: string,
-  videoId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  user: any,
-) => {
-  if (user.id !== id && !user.isAdmin) {
-    throw new AppError('Unauthorized!', 401);
-  }
-  try {
-    const exists = user.favourites.some((fav: string) => fav === videoId);
-    let result;
-    if (exists) {
-      user.favourites = user.favourites.filter(
-        (fav: string) => fav !== videoId,
-      );
-      result = { message: 'Removed from favourites', data: user.favourites };
-    } else {
-      user.favourites.push(videoId);
-      result = { message: 'Added to favourites', data: user.favourites };
-    }
-    await user.save();
-    return { success: true, data: result };
-  } catch (error) {
-    throw new AppError(error as string, 500);
-  }
-};
+//todo : work on it after video feature is added
+// export const updateFavourites = async (
+//   id: string,
+//   videoId: string,
+//   user: IUser,
+// ) => {
+//   if (user.id !== id && !user.isAdmin) {
+//     throw new AppError('Unauthorized!', 401);
+//   }
+//   try {
+//     const exists = user.favourites.some((fav: string) => fav === videoId);
+//     let result;
+//     if (exists) {
+//       user.favourites = user.favourites.filter(
+//         (fav: string) => fav !== videoId,
+//       );
+//       result = { message: 'Removed from favourites', data: user.favourites };
+//     } else {
+//       user.favourites.push(videoId);
+//       result = { message: 'Added to favourites', data: user.favourites };
+//     }
+//     await user.save();
+//     return { success: true, data: result };
+//   } catch (error) {
+//     throw new AppError(error as string, 500);
+//   }
+// };
 
 export const authenticateUser = async (email: string, password: string) => {
   const user = await User.findOne({ email });
@@ -167,10 +177,9 @@ export const authenticateUser = async (email: string, password: string) => {
       id: user._id?.toString() || '',
     };
     const token = jwt.sign(userForToken, SECRET, { expiresIn: '1d' });
-
     user.logged_in = (user.logged_in || 0) + 1;
     await user.save();
-
+    logger.info(`${user.username} user logged in`);
     return { token };
   } catch (error) {
     throw new AppError(error as string, 500);
