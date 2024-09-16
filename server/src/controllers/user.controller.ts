@@ -43,17 +43,17 @@ export const updateUser = catchAsync(
   },
 );
 
-// Update favourites
-export const updateFavourites = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    await UserService.updateFavourites(
-      req.params.id,
-      req.body.videoId,
-      req.user,
-    );
-    res.status(200).json({ message: 'favourites updated successfully' });
-  },
-);
+// todo work on this after video feature is added
+// export const updateFavourites = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     await UserService.updateFavourites(
+//       req.params.id,
+//       req.body.videoId,
+//       req.user,
+//     );
+//     res.status(200).json({ message: 'favourites updated successfully' });
+//   },
+// );
 
 // Login user
 export const loginUser = catchAsync(
