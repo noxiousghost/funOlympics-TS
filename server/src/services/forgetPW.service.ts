@@ -3,6 +3,7 @@ import FpMail from '../schemas/fpMail.schema';
 import Bcrypt from 'bcrypt';
 import FpMailSender from '../utils/fpMailSender.util';
 import { AppError } from '../middlewares/errorHandlers.middleware';
+import { logger } from '../configs/logger.config';
 
 export const requestPasswordReset = async (email: string) => {
   const user = await User.findOne({ email });
@@ -10,6 +11,7 @@ export const requestPasswordReset = async (email: string) => {
     throw new AppError("User doesn't exist!", 401);
   }
   const sendMail = await FpMailSender.sendEmail(email);
+  logger.info('New Password reset submitted');
   if (!sendMail) {
     throw new AppError('Failed to send OTP!', 400);
   }
@@ -37,6 +39,9 @@ export const updatePassword = async (email: string, newPassword: string) => {
   const fpMail = await FpMail.findOne({ email });
   if (!fpMail || !fpMail.verified) {
     throw new AppError('OTP code not verified!', 400);
+  }
+  if (await Bcrypt.compare(newPassword, user.passwordHash)) {
+    throw new AppError('New password cannot be same as previous password', 400);
   }
   const newPasswordHash = await Bcrypt.hash(newPassword, 10);
   user.passwordHash = newPasswordHash;
