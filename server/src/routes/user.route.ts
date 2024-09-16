@@ -41,7 +41,7 @@ userRouter.patch(
 );
 
 // update favourites after user login
-userRouter.patch('/fav/:id', checkValidAuth, UserController.updateFavourites);
+// userRouter.patch('/fav/:id', checkValidAuth, UserController.updateFavourites);
 
 // login user
 userRouter.post(
