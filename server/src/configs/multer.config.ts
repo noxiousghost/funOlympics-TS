@@ -2,30 +2,13 @@ import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
-import { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
+import { Request } from 'express';
 import { AppError } from '../middlewares/errorHandlers.middleware';
 
 interface FileRequest extends Request {
   fileType?: string;
 }
-
-// Error handling middleware for Multer
-export const multerErrorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  if (err instanceof multer.MulterError) {
-    if (err.code === 'LIMIT_FILE_SIZE') {
-      return next(new AppError('File size limit exceeded', 413));
-    }
-    return next(new AppError(`Multer error: ${err.message}`, 400));
-  } else if (err) {
-    return next(new AppError(err.message, 500));
-  }
-  next();
-};
 
 // File type validation
 const fileFilter = (
@@ -58,32 +41,36 @@ const fileFilter = (
   }
 };
 
-// Storage configuration using multer.diskStorage
+// Storage configuration
 const storage = multer.diskStorage({
   destination: function (req: FileRequest, file: Express.Multer.File, cb) {
-    const fileType = req.fileType || 'random';
-    const uploadPath = `public/uploads/${fileType}`;
-    fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
+    const fileType = req.fileType || 'misc';
+    const uploadPath = path.join(process.cwd(), 'public', 'uploads', fileType);
+    fs.promises
+      .mkdir(uploadPath, { recursive: true })
+      .then(() => cb(null, uploadPath))
+      .catch((err) => cb(err, uploadPath));
   },
   filename: (
     req: Request,
     file: Express.Multer.File,
     cb: (error: Error | null, filename: string) => void,
   ) => {
-    const newFileName = `${uuidv4()}-${file.originalname.trim()}`;
+    const fileHash = crypto.createHash('md5').update(uuidv4()).digest('hex'); // for unique file name
+    const ext = path.extname(file.originalname);
+    const newFileName = `${fileHash}${ext}`;
     cb(null, newFileName);
   },
 });
 
-// Configure Multer for images
+// for images
 export const uploadImage = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit for images
   fileFilter: fileFilter,
 }).single('image');
 
-// Configure Multer for videos
+// for videos
 export const uploadVideo = multer({
   storage: storage,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB limit for videos

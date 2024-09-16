@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { MongoServerError } from 'mongodb';
 import { envVars } from '../configs/envVars.config';
 import { logger } from '../configs/logger.config';
+import multer from 'multer';
 
 export class AppError extends Error {
   statusCode: number;
@@ -75,4 +76,22 @@ export const catchAsync = (
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next); // Forward error to errorHandler
   };
+};
+
+// Error handling middleware for Multer
+export const multerErrorHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return next(new AppError('File size limit exceeded', 413));
+    }
+    return next(new AppError(`Multer error: ${err.message}`, 400));
+  } else if (err) {
+    return next(new AppError(err.message, 500));
+  }
+  next();
 };
