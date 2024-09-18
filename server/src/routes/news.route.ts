@@ -6,6 +6,8 @@ import { setFileType } from '../middlewares/setFileType.middleware';
 import { multerErrorHandler } from '../middlewares/errorHandlers.middleware';
 import { sanitizeFileName } from '../middlewares/sanitizeFileName.middleware';
 import { newsExists } from '../middlewares/exists.middleware';
+import { validateRequest } from '../middlewares/validation.middleware';
+import { createNews, updateNews } from '../constants/news.validation';
 
 const newsRouter = Router();
 
@@ -19,9 +21,15 @@ newsRouter.post(
   sanitizeFileName,
   multerErrorHandler,
   newsExists,
+  validateRequest(createNews),
   NewsController.createNews,
 );
-newsRouter.patch('/:id', checkAdmin, NewsController.updateNews);
+newsRouter.patch(
+  '/:id',
+  checkAdmin,
+  validateRequest(updateNews),
+  NewsController.updateNews,
+);
 newsRouter.delete('/:id', checkAdmin, NewsController.deleteNews);
 
 export default newsRouter;
