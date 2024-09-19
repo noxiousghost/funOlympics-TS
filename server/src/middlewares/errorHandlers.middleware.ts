@@ -4,17 +4,8 @@ import { MongoServerError } from 'mongodb';
 import { envVars } from '../configs/envVars.config';
 import { logger } from '../configs/logger.config';
 import multer from 'multer';
+import { AppError } from 'configs/AppError.config';
 
-export class AppError extends Error {
-  statusCode: number;
-  isOperational: boolean;
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-    this.isOperational = true;
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
 // middleware to handle errors
 export const errorHandler = (
   err: Error,
