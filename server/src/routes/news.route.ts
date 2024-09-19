@@ -3,7 +3,6 @@ import { checkAdmin } from '../middlewares/authentication.middleware';
 import * as NewsController from '../controllers/news.controller';
 import { uploadImage } from '../configs/multer.config';
 import { setFileType } from '../middlewares/setFileType.middleware';
-import { multerErrorHandler } from '../middlewares/errorHandlers.middleware';
 import { sanitizeFileName } from '../middlewares/sanitizeFileName.middleware';
 import { newsExists } from '../middlewares/exists.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
@@ -19,7 +18,6 @@ newsRouter.post(
   setFileType,
   uploadImage,
   sanitizeFileName,
-  multerErrorHandler,
   newsExists,
   validateRequest(createNews),
   NewsController.createNews,

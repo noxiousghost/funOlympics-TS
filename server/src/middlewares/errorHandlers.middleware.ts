@@ -48,6 +48,17 @@ export const errorHandler = (
         message = 'Duplicate field value entered';
       }
       break;
+    case 'MulterError':
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          statusCode = 413;
+          message = 'File size limit exceeded';
+        } else {
+          statusCode = 400;
+          message = `Multer error: ${err.message}`;
+        }
+      }
+      break;
   }
 
   // In development, send stack trace for better debugging
@@ -69,20 +80,4 @@ export const catchAsync = (
   };
 };
 
-// Error handling middleware for Multer
-export const multerErrorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  if (err instanceof multer.MulterError) {
-    if (err.code === 'LIMIT_FILE_SIZE') {
-      return next(new AppError('File size limit exceeded', 413));
-    }
-    return next(new AppError(`Multer error: ${err.message}`, 400));
-  } else if (err) {
-    return next(new AppError(err.message, 500));
-  }
-  next();
-};
+export { AppError };
