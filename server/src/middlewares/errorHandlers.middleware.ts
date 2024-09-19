@@ -4,7 +4,7 @@ import { MongoServerError } from 'mongodb';
 import { envVars } from '../configs/envVars.config';
 import { logger } from '../configs/logger.config';
 import multer from 'multer';
-import { AppError } from 'configs/AppError.config';
+import { AppError } from '../configs/AppError.config';
 
 // middleware to handle errors
 export const errorHandler = (
