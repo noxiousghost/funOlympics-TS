@@ -71,13 +71,4 @@ export const errorHandler = (
   });
 };
 
-// Async Error Wrapper for cleaner controller code
-export const catchAsync = (
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>,
-) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next); // Forward error to errorHandler
-  };
-};
-
 export { AppError };
