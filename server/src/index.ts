@@ -6,8 +6,7 @@ import {
   tokenExtractor,
 } from './middlewares/authentication.middleware';
 import DbConnection from './configs/db.config';
-import userRouter from './routes/user.route';
-import newsRouter from './routes/news.route';
+import routes from './routes/index.route';
 import helmet from 'helmet';
 import { unknownEndpoint } from './middlewares/unknownEndpoint.middleware';
 import { errorHandler } from './middlewares/errorHandlers.middleware';
@@ -20,8 +19,7 @@ app.use(morganMiddleware());
 app.use(tokenExtractor);
 app.use(userExtractor);
 
-app.use('/api/users', userRouter);
-app.use('/api/news', newsRouter);
+app.use('/api', routes);
 
 app.use(unknownEndpoint);
 app.use(errorHandler);
