@@ -6,7 +6,6 @@
     "moduleResolution": "node",
     "baseUrl": "./src",
     "declaration": true,
-    "emitDeclarationOnly": true,
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
