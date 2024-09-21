@@ -83,17 +83,7 @@ export const verifyUser = async (email: string, code: number) => {
   return user;
 };
 
-export const updateUser = async (
-  id: string,
-  userData: {
-    username: string;
-    email: string;
-    password: string;
-    country: string;
-    favoriteSport: string;
-    phone: string;
-  },
-) => {
+export const updateUser = async (id: string, userData: IUser) => {
   const { username, email, password, country, favoriteSport, phone } = userData;
   const currentUser = await User.findById(id);
   if (!currentUser) {

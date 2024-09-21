@@ -7,6 +7,7 @@ export interface IUser extends Document {
   country?: string;
   favoriteSport?: string;
   passwordHash: string;
+  password?: string;
   // favourites: string[]; // these are IDs referring to 'videos' which is yet to create
   verified: boolean;
   isAdmin: boolean;
