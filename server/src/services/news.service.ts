@@ -50,12 +50,17 @@ export const createNews = async (user: IUser, newsData: INews, file: any) => {
 };
 
 export const updateNews = async (id: string, newsData: INews) => {
+  const newsExists = await News.findById(id);
+  if (!newsExists) {
+    throw new AppError('News not found', 404);
+  }
   const result = await News.findByIdAndUpdate(id, newsData);
+  const updatedData = await News.findById(id);
   if (!result) {
     throw new AppError('News not updated', 400);
   }
   logger.info(`${result.title} news updated`);
-  return result;
+  return updatedData;
 };
 
 export const deleteNews = async (id: string) => {
