@@ -21,7 +21,7 @@ export const findAllUsers = async () => {
   // return await User.find({}).populate('favourites');
 };
 
-export const findUserById = async (id: string, user: IUser) => {
+export const findUserById = async (id: string) => {
   const result = await User.findById(id);
   if (!result) {
     throw new AppError('User not found', 404);
@@ -29,14 +29,7 @@ export const findUserById = async (id: string, user: IUser) => {
   return result;
 };
 
-export const createUser = async (userData: {
-  username: string;
-  email: string;
-  password: string;
-  country: string;
-  favoriteSport: string;
-  phone: string;
-}) => {
+export const createUser = async (userData: IUser) => {
   const { username, email, password, country, favoriteSport, phone } = userData;
   if ((await User.findOne({ email })) || (await User.findOne({ phone }))) {
     throw new AppError('User with that email or phone already exists', 400);
@@ -45,7 +38,7 @@ export const createUser = async (userData: {
   const user = new User({
     username,
     email,
-    passwordHash,
+    password: passwordHash,
     country,
     phone,
     favoriteSport,
@@ -107,7 +100,7 @@ export const updateUser = async (id: string, userData: IUser) => {
   const newData = {
     username,
     email,
-    passwordHash,
+    password: passwordHash,
     country,
     favoriteSport,
     phone,
@@ -153,7 +146,7 @@ export const authenticateUser = async (email: string, password: string) => {
   if (!user) {
     throw new AppError('Invalid email or password', 400);
   }
-  const passwordCorrect = await Bcrypt.compare(password, user.passwordHash);
+  const passwordCorrect = await Bcrypt.compare(password, user.password);
   if (!passwordCorrect) {
     throw new AppError('Invalid email or password', 400);
   }

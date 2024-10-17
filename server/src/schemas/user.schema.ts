@@ -8,7 +8,7 @@ const userSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true },
     country: { type: String },
     favoriteSport: { type: String },
-    passwordHash: { type: String, required: true },
+    password: { type: String, required: true },
     // favourites: [{ type: Schema.Types.ObjectId, ref: 'videos' }],
     verified: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: false },
@@ -29,7 +29,7 @@ function docTransform(
     id: (ret._id as mongoose.Types.ObjectId).toString(),
   };
   delete transformedRet._id;
-  delete transformedRet.passwordHash; // password hash is never exposed
+  delete transformedRet.password; // password hash is never exposed
   return transformedRet;
 }
 

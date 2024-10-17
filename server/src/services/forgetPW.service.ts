@@ -40,11 +40,11 @@ export const updatePassword = async (email: string, newPassword: string) => {
   if (!fpMail || !fpMail.verified) {
     throw new AppError('OTP code not verified!', 400);
   }
-  if (await Bcrypt.compare(newPassword, user.passwordHash)) {
+  if (await Bcrypt.compare(newPassword, user.password)) {
     throw new AppError('New password cannot be same as previous password', 400);
   }
   const newPasswordHash = await Bcrypt.hash(newPassword, 10);
-  user.passwordHash = newPasswordHash;
+  user.password = newPasswordHash;
   await user.save();
   return user;
 };
