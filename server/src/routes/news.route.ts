@@ -13,7 +13,7 @@ const newsRouter = Router();
 newsRouter.get('/', NewsController.getAllNews);
 newsRouter.get('/:id', NewsController.getNewsById);
 newsRouter.post(
-  '/',
+  '/create',
   checkAdmin,
   setFileType,
   uploadImage,
@@ -23,11 +23,11 @@ newsRouter.post(
   NewsController.createNews,
 );
 newsRouter.patch(
-  '/:id',
+  '/edit/:id',
   checkAdmin,
   validateRequest(updateNews),
   NewsController.updateNews,
 );
-newsRouter.delete('/:id', checkAdmin, NewsController.deleteNews);
+newsRouter.delete('/delete/:id', checkAdmin, NewsController.deleteNews);
 
 export default newsRouter;

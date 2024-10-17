@@ -24,7 +24,7 @@ userRouter.get('/:id', checkValidAuth, UserController.getUserById);
 
 // signup user
 userRouter.post(
-  '/',
+  '/signup',
   rateLimiter,
   validateRequest(registerSchema),
   UserController.createUser,
@@ -34,7 +34,7 @@ userRouter.post('/verify', UserController.verifyUser);
 
 // update user after user login
 userRouter.patch(
-  '/:id',
+  '/edit/:id',
   checkValidAuth,
   validateRequest(updateSchema),
   UserController.updateUser,
