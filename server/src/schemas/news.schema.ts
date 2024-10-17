@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { INews } from '../interfaces/news.model';
+import { INews } from '../interfaces/news.interface';
 
 const newsSchema = new Schema<INews>({
   title: { type: String, required: true },
