@@ -23,7 +23,7 @@ export const getUserById = async (
   next: NextFunction,
 ) => {
   try {
-    const user = await UserService.findUserById(req.params.id, req.user);
+    const user = await UserService.findUserById(req.params.id);
     res.status(200).json(user);
   } catch (error) {
     next(error);
