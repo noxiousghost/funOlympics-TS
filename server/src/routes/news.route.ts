@@ -4,7 +4,6 @@ import * as NewsController from '../controllers/news.controller';
 import { uploadImage } from '../configs/multer.config';
 import { setFileType } from '../middlewares/setFileType.middleware';
 import { sanitizeFileName } from '../middlewares/sanitizeFileName.middleware';
-import { newsExists } from '../middlewares/exists.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 import { createNews, updateNews } from '../constants/news.validation';
 
@@ -18,7 +17,6 @@ newsRouter.post(
   setFileType,
   uploadImage,
   sanitizeFileName,
-  newsExists,
   validateRequest(createNews),
   NewsController.createNews,
 );
