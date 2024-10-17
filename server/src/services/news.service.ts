@@ -31,13 +31,21 @@ export const findNewsById = async (id: string) => {
 
 export const createNews = async (user: IUser, newsData: INews, file: any) => {
   let imagePath;
+  const { title, description } = newsData;
   const { path } = file;
   if (path) {
     imagePath = path.replace('public', '');
   }
+  const exists = await News.findOne({ title: title });
+  if (exists) {
+    if (path) {
+      fs.rmSync(path);
+    }
+    throw new AppError(`${title} already exists!`, 409);
+  }
   const news = await new News({
-    title: newsData.title,
-    description: newsData.description,
+    title: title,
+    description: description,
     image: imagePath,
     user: user.id,
   }).populate('user', { username: 1, email: 1 });
@@ -50,9 +58,17 @@ export const createNews = async (user: IUser, newsData: INews, file: any) => {
 };
 
 export const updateNews = async (id: string, newsData: INews) => {
+  const { title } = newsData;
   const newsExists = await News.findById(id);
   if (!newsExists) {
     throw new AppError('News not found', 404);
+  }
+  // Check only if the news title is different from the current one
+  if (title && title !== newsExists.title) {
+    const newsTitle = await News.findOne({ title });
+    if (newsTitle) {
+      throw new AppError('News with that title already exists', 400);
+    }
   }
   const result = await News.findByIdAndUpdate(id, newsData);
   const updatedData = await News.findById(id);
