@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import News from '../schemas/news.schema';
 import { AppError } from '../middlewares/errorHandlers.middleware';
-import { INews } from '../models/news.model';
-import { IUser } from '../models/user.model';
+import { INews } from '../interfaces/news.model';
+import { IUser } from '../interfaces/user.model';
 import { logger } from '../configs/logger.config';
 import path from 'path';
 import fs from 'fs';

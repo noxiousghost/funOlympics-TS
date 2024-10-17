@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import { envVars } from '../configs/envVars.config';
 import { AppError } from '../middlewares/errorHandlers.middleware';
 import { logger } from '../configs/logger.config';
-import { IUser } from '../models/user.model';
+import { IUser } from '../interfaces/user.model';
 import mongoose from 'mongoose';
 
 const SECRET = envVars.JWTSECRET as string;

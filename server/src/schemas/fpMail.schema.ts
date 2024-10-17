@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { IfpMail } from '../models/fpMail.model';
+import { IfpMail } from '../interfaces/fpMail.model';
 
 const FpMailSchema = new mongoose.Schema<IfpMail>({
   email: {
