@@ -1,8 +1,5 @@
-import { Document } from 'mongoose';
+import { IMail } from './mail.interface';
 
-export interface IfpMail extends Document {
-  email: string;
-  code: number;
+export interface IfpMail extends IMail {
   verified: boolean;
-  createdAt: Date;
 }
