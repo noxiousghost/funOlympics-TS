@@ -30,34 +30,6 @@ export const getUserById = async (
   }
 };
 
-// Create user
-export const createUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    await UserService.createUser(req.body);
-    res.status(201).json({ message: 'user created successfully' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Verify user
-export const verifyUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    await UserService.verifyUser(req.body.email, req.body.code);
-    res.status(200).json({ message: 'user verified successfully' });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // Update user
 export const updateUser = async (
   req: Request,
@@ -92,20 +64,3 @@ export const updateUser = async (
 //
 
 // Login user
-export const loginUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { email, password } = req.body;
-    const { token } = await UserService.authenticateUser(email, password);
-
-    res.status(200).json({
-      token,
-      message: 'Logged in successfully',
-    });
-  } catch (error) {
-    next(error);
-  }
-};
