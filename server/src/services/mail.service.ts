@@ -1,7 +1,7 @@
 import { transporter, verifyTransporter } from '../configs/mailer.config';
 import OtpService, { OtpType } from './otp.service';
 import { envVars } from '../configs/envVars.config';
-import { AppError } from 'configs/AppError.config';
+import { AppError } from '../configs/AppError.config';
 
 const SENDER_EMAIL = envVars.EMAIL as string;
 
