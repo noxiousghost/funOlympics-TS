@@ -5,3 +5,6 @@ export interface IMail extends Document {
   code: number;
   createdAt: Date;
 }
+export interface IfpMail extends IMail {
+  verified: boolean;
+}
