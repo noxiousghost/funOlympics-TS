@@ -1,7 +1,8 @@
 import User from '../schemas/user.schema';
 import FpMail from '../schemas/fpMail.schema';
 import Bcrypt from 'bcrypt';
-import FpMailSender from '../utils/fpMailSender.util';
+import MailService from '../services/mail.service';
+import { OtpType } from '../services/otp.service';
 import { AppError } from '../middlewares/errorHandlers.middleware';
 import { logger } from '../configs/logger.config';
 
@@ -10,7 +11,10 @@ export const requestPasswordReset = async (email: string) => {
   if (!user) {
     throw new AppError("User doesn't exist!", 401);
   }
-  const sendMail = await FpMailSender.sendEmail(email);
+  const sendMail = await MailService.sendOtpEmail(
+    email,
+    OtpType.FORGOT_PASSWORD,
+  );
   logger.info('New Password reset submitted');
   if (!sendMail) {
     throw new AppError('Failed to send OTP!', 400);

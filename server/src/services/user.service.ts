@@ -1,14 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import User from '../schemas/user.schema';
 import Bcrypt from 'bcrypt';
-import MailService from '../utils/mail.util';
-import MailSender from '../utils/mailSender.util';
+import MailService from '../services/mail.service';
+import otpService, { OtpType } from '../services/otp.service';
 import jwt from 'jsonwebtoken';
 import { envVars } from '../configs/envVars.config';
 import { AppError } from '../middlewares/errorHandlers.middleware';
 import { logger } from '../configs/logger.config';
 import { IUser } from '../interfaces/user.interface';
-import mongoose from 'mongoose';
 
 const SECRET = envVars.JWTSECRET as string;
 
@@ -48,7 +46,7 @@ export const createUser = async (userData: IUser) => {
     throw new AppError('User not created', 400);
   }
   logger.info(`New ${result.username} user created`);
-  const sendEmail = await MailSender.sendEmail(email);
+  const sendEmail = await MailService.sendOtpEmail(email, OtpType.SIGNUP);
   if (!sendEmail) {
     throw new AppError('Error while sending verification email', 400);
   }
@@ -60,7 +58,7 @@ export const verifyUser = async (email: string, code: number) => {
   if (!user) {
     throw new AppError('User not registered', 404);
   }
-  const mail = await MailService.find(email);
+  const mail = await otpService.findOtp(email, OtpType.SIGNUP);
   if (!mail) {
     throw new AppError('Verification code not found', 400);
   }
